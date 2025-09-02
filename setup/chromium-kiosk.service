@@ -1,0 +1,24 @@
+[Unit]
+Description=Chromium Kiosk Mode
+After=graphical.target sway-session.target
+PartOf=graphical.target
+
+[Service]
+ExecStart=/usr/bin/chromium --kiosk \
+	 --noerrdialogs --disable-infobars \ 
+	 --disable-session-crashed-bubble \
+ 	 --disable-save-password-bubble  \ 
+	 --disable-features=AutofillServerCommunication \
+	 --password-store=basic --incognito --no-first-run \
+	 --disable-translate --disable-popup-blocking \
+	 --disable-pinch \
+  	 --overscroll-history-navigation=0 \
+ 	 "https://bromart-17.kz"
+Restart=always
+RestartSec=2
+Environment=DISPLAY=:0
+Environment=XDG_RUNTIME_DIR=%t
+Environment=WAYLAND_DISPLAY=wayland-1
+
+[Install]
+WantedBy=default.target

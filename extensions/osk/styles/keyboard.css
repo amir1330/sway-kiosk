@@ -1,0 +1,144 @@
+.keyboard-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  background: #f5f5f5;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+  padding: 10px;
+  z-index: 999999;
+  display: none;
+  font-family: 'Roboto', sans-serif;
+  box-sizing: border-box;
+  border-top: 1px solid #e0e0e0;
+}
+
+.keyboard-container.visible {
+  display: block;
+}
+
+.keyboard-row {
+  display: flex;
+  justify-content: center;
+  margin: 5px 0;
+  width: 100%;
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
+  gap: 5px;
+}
+
+.key {
+  min-width: 60px;
+  height: 60px;
+  border: none;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #333;
+  font-size: 22px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.1s ease;
+  user-select: none;
+  flex: 1;
+  max-width: 90px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  font-weight: 500;
+}
+
+.key:hover {
+  background: #f0f0f0;
+}
+
+.key:active {
+  background: #e0e0e0;
+  transform: scale(0.95);
+}
+
+.key.special {
+  background: #e0e0e0;
+  font-weight: bold;
+}
+
+.key.space {
+  flex: 4;
+  max-width: 350px;
+}
+
+.key.shift {
+  flex: 1.5;
+  max-width: 120px;
+  background: #e0e0e0;
+}
+
+.key.enter {
+  flex: 1.5;
+  max-width: 120px;
+  background: #2196F3;
+  color: white;
+}
+
+.key.backspace {
+  flex: 1.5;
+  max-width: 120px;
+  background: #e0e0e0;
+  font-size: 26px;
+}
+
+.key.lang-switch {
+  flex: 1;
+  max-width: 90px;
+  background: #e0e0e0;
+}
+
+.key.symbol-switch {
+  flex: 1;
+  max-width: 90px;
+  background: #e0e0e0;
+}
+
+.key.hide-keyboard {
+  flex: 1;
+  max-width: 90px;
+  background: #e0e0e0;
+}
+
+/* Media queries for different screen sizes */
+@media screen and (min-width: 1920px) {
+  .key {
+    min-width: 70px;
+    height: 70px;
+    font-size: 26px;
+  }
+  
+  .keyboard-row {
+    max-width: 1800px;
+  }
+}
+
+@media screen and (min-width: 2560px) {
+  .key {
+    min-width: 80px;
+    height: 80px;
+    font-size: 30px;
+  }
+  
+  .keyboard-row {
+    max-width: 2200px;
+  }
+}
+
+@media screen and (min-width: 3840px) {
+  .key {
+    min-width: 90px;
+    height: 90px;
+    font-size: 34px;
+  }
+  
+  .keyboard-row {
+    max-width: 2600px;
+  }
+}
