@@ -127,7 +127,7 @@ echo "sway config has been created"
 
 
 ### display fetch script 
-FD_DIR="%HOME/scripts"
+FD_DIR="$HOME/scripts"
 FD_FILE="$FD_DIR/fetch-display.sh"
 
 mkdir -p "$FD_DIR"
