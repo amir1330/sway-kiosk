@@ -25,25 +25,27 @@
 1. boot debian 13 and login
 2. update and upgrade
 ```bash
-sudo apt update && sudo apt upgrade -y
+sudo apt update && sudo apt upgrade -y```
 3. install packages 
 ```bash
 sudo apt install sddm  --no-install-recommends
-sudo apt install sway git jq chromium xwayland
+sudo apt install sway git jq chromium xwayland```
 4. clone repo
-```git clone https://amir1330/sway-kiosk```
+```bash 
+git clone https://amir1330/sway-kiosk```
 5. run sddm.sh
 ```bash 
-./sway-kiosk/setup/sddm.sh 
+./sway-kiosk/setup/sddm.sh``` 
 7. reboot
 8. Win + Enter to open terminal 
-9. open chromium ```bash 
-chromium
+9. open chromium 
+```bash 
+chromium``
 10. turn on dev mode and load extension
 ☰ -> settings -> extensions -> turn on **developer mode** -> **load unpucked** -> open /home/sway-kiosk/extensions/osk
 11. dont forget to enable extension in incognito by going -> **details** -> and **allow in incognito**
 12. in chromium setting go **language** -> and turn off **spell check** and **google translate** 
 13. in terminal press **CTRL + C** to kill chromium window and 
 ```bash
-./sway-kiosk/setup/install.sh
+./sway-kiosk/setup/install.sh```
 14. done
