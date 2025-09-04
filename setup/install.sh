@@ -70,7 +70,7 @@ set \$term foot
 
 ### Output configuration
 
-exec_always --no-startup-id ~/sway-kiosk/setup/fetch-display.sh
+exec_always --no-startup-id ~/scripts/fetch-display.sh
 
 
 output $OUTPUT {
@@ -125,5 +125,32 @@ EOF
 
 echo "sway config has been created"
 
+
+### display fetch script 
+FD_DIR="%HOME/scripts"
+FD_FILE="$FD_DIR/fetch-display.sh"
+
+mkdir -p "$FD_DIR"
+
+cat > "FD_FILE" <<EOF
+#!/usr/bin/env bash 
+set -euo pipefail
+
+# Query sway for active output, max resolution, and touch device
+RES=\$(swaymsg -t get_outputs -r | jq -r '.[] | select(.active) | .modes | max_by(.width * .height) | "\(.width)x\(.height)"')
+TOUCH=\$(swaymsg -t get_inputs -r | jq -r '.[] | select(.type=="touch") | .identifier')
+OUTPUT=\$(swaymsg -t get_outputs -r | jq -r '.[] | select(.active) | .name')
+ROTATION=$ROT
+echo "Applying kiosk display config:"
+echo "  OUTPUT=$OUTPUT"
+echo "  RES=$RES"
+echo "  TOUCH=$TOUCH"
+
+# Apply dynamically (no rotation here)
+swaymsg "output \$OUTPUT mode \$RES transform \$ROTATION"
+swaymsg "input \$TOUCH map_to_output \$OUTPUT"
+EOF
+
+chmod +x "$FD_FILE"
 
 echo "✅ All done! At next login, Chromium will launch in kiosk mode at https://$URL"
