@@ -87,7 +87,7 @@ input $TOUCH {
 # Basics:
 
     # Start a terminal
-    bindsym \$mod+Return exec $term
+    bindsym \$mod+Return exec \$term
 
     # Kill focused window
     bindsym \$mod+Shift+q kill
