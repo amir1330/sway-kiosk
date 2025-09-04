@@ -126,9 +126,9 @@ echo "sway config has been created"
 
 
 ### display fetch script 
-mkdir -p "~/scripts"
+mkdir -p "/home/kiosk/scripts"
 
-cat > "~/scripts/fetch-display.sh" <<EOF
+cat > "/home/kiosk/scripts/fetch-display.sh" <<EOF
 #!/usr/bin/env bash 
 set -euo pipefail
 
@@ -147,7 +147,7 @@ swaymsg "output \$OUTPUT mode \$RES transform \$ROTATION"
 swaymsg "input \$TOUCH map_to_output \$OUTPUT"
 EOF
 
-chmod +x "~/scripts/fetch-display.sh"
+chmod +x "/home/kiosk/scripts/fetch-display.sh"
 
 echo "✅ All done! At next login, Chromium will launch in kiosk mode at https://$URL"
 
