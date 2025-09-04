@@ -132,7 +132,7 @@ FD_FILE="$FD_DIR/fetch-display.sh"
 
 mkdir -p "$FD_DIR"
 
-cat > "FD_FILE" <<EOF
+cat > "$FD_FILE" <<EOF
 #!/usr/bin/env bash 
 set -euo pipefail
 
