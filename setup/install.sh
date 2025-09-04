@@ -63,13 +63,15 @@ mkdir -p "$SWAY_DIR"
 cat > "$SWAY_CONFIG" <<EOF
 ### Variables
 #Logo key. Use Mod1 for Alt.
-
 set \$mod Mod4
 
 # Your preferred terminal emulator
 set \$term foot
 
 ### Output configuration
+
+exec_always --no-startup-id ~/sway-kiosk/setup/fetch-display.sh
+
 
 output $OUTPUT {
         mode $RES
