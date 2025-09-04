@@ -9,7 +9,7 @@ if [[ -z "$URL" ]]; then
 fi
 
 ### 2) prompt for transform value
-read -rp "Enter screen rotation (0, 90, 180, 270): " ROT
+read -rp "Enter screen rotation (0, 90, 180, 270)(clockwise): " ROT
 case "$ROT" in
     0|90|180|270) 
         echo "✅ Rotation set to $ROT"
