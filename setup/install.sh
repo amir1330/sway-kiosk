@@ -64,10 +64,10 @@ cat > "$SWAY_CONFIG" <<EOF
 ### Variables
 #Logo key. Use Mod1 for Alt.
 
-set $mod Mod4
+set \$mod Mod4
 
 # Your preferred terminal emulator
-set $term foot
+set \$term foot
 
 ### Output configuration
 
@@ -87,10 +87,10 @@ input $TOUCH {
 # Basics:
 
     # Start a terminal
-    bindsym $mod+Return exec $term
+    bindsym \$mod+Return exec $term
 
     # Kill focused window
-    bindsym $mod+Shift+q kill
+    bindsym \$mod+Shift+q kill
 
     # bind volume control buttons
     bindsym XF86AudioMute exec pactl set-sink-mute @DEFAULT_SINK@ toggle
@@ -102,7 +102,7 @@ input $TOUCH {
     bindsym XF86MonBrightnessDown exec light -U 5 
 
     # Reload the configuration file
-    bindsym $mod+Shift+c reload
+    bindsym \$mod+Shift+c reload
 
 include /etc/sway/config.d/*
 
