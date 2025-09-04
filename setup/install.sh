@@ -106,7 +106,6 @@ input $TOUCH {
     # Reload the configuration file
     bindsym \$mod+Shift+c reload
 
-include /etc/sway/config.d/*
 
 # Disable F1–F12 from doing anything inside apps
 bindsym --release F1 nop
@@ -127,12 +126,9 @@ echo "sway config has been created"
 
 
 ### display fetch script 
-FD_DIR="$HOME/scripts"
-FD_FILE="$FD_DIR/fetch-display.sh"
+mkdir -p "~/scripts"
 
-mkdir -p "$FD_DIR"
-
-cat > "$FD_FILE" <<EOF
+cat > "~/scripts/fetch-display.sh" <<EOF
 #!/usr/bin/env bash 
 set -euo pipefail
 
@@ -142,15 +138,18 @@ TOUCH=\$(swaymsg -t get_inputs -r | jq -r '.[] | select(.type=="touch") | .ident
 OUTPUT=\$(swaymsg -t get_outputs -r | jq -r '.[] | select(.active) | .name')
 ROTATION=$ROT
 echo "Applying kiosk display config:"
-echo "  OUTPUT=$OUTPUT"
-echo "  RES=$RES"
-echo "  TOUCH=$TOUCH"
+echo "  OUTPUT=\$OUTPUT"
+echo "  RES=\$RES"
+echo "  TOUCH=\$TOUCH"
 
 # Apply dynamically (no rotation here)
 swaymsg "output \$OUTPUT mode \$RES transform \$ROTATION"
 swaymsg "input \$TOUCH map_to_output \$OUTPUT"
 EOF
 
-chmod +x "$FD_FILE"
+chmod +x "~/scripts/fetch-display.sh"
 
 echo "✅ All done! At next login, Chromium will launch in kiosk mode at https://$URL"
+
+
+include /etc/sway/config.d/*
