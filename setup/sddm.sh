@@ -11,8 +11,14 @@ if [[ ! -f /etc/sddm.conf.d/sway.conf ]]; then
 User=kiosk
 Session=sway.desktop
 EOF
-  echo "✅ Created sway.conf.  now u can REBOOT and ./install.sh "
+  echo "✅ Created sway.conf."
 else
   echo "⚠️  /etc/sddm.conf.d/sway.conf already exists, not overwriting."
 fi
+
+echo "🔧 Enabling and setting SDDM as default display manager..."
+sudo systemctl enable sddm.service
+sudo systemctl set-default graphical.target
+
+echo "✅ SDDM enabled. You can now reboot."
 
