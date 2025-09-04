@@ -34,7 +34,7 @@ After=graphical.target sway-session.target
 PartOf=graphical.target
 
 [Service]
-ExecStart=/usr/bin/chromium --kiosk --noerrdialogs --disable-infobars --disable-session-crashed-bubble --disable-save-password-bubble --disable-features=AutofillServerCommunication --password-store=basic --incognito --no-first-run --disable-translate --disable-popup-blocking --disable-pinch --overscroll-history-navigation=0 https://$URL
+ExecStart=/usr/bin/chromium --kiosk --noerrdialogs --disable-infobars --disable-session-crashed-bubble --disable-save-password-bubble --disable-features=AutofillServerCommunication,KeyboardShortcuts --password-store=basic --incognito --no-first-run --disable-translate --disable-popup-blocking --disable-pinch --overscroll-history-navigation=0 https://$URL
 
 Restart=always
 RestartSec=2
