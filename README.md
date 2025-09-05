@@ -33,9 +33,9 @@
 > [!IMPORTANT]
 > for script to work properly make sure that user name is **kiosk**
 1. boot debian 13 and login
-2. install git
+2. install git & sddm
 ```
-sudo apt update && sudo apt install git
+sudo apt update && sudo apt install git sddm
 ```
 3. clone repo
 ```
