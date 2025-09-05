@@ -30,8 +30,8 @@
 12. reboot
 
 ## sway-kiosk installation
-[!IMPORTANT]
-for script to work properly make sure that user name is **kiosk**
+> [!IMPORTANT]
+> for script to work properly make sure that user name is **kiosk**
 1. boot debian 13 and login
 2. install git
 ```
