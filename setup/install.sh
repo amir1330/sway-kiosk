@@ -120,6 +120,9 @@ bindsym --release F9 nop
 bindsym --release F10 nop
 bindsym --release F11 nop
 bindsym --release F12 nop
+
+include /etc/sway/config.d/*
+
 EOF
 
 echo "sway config has been created"
@@ -152,4 +155,3 @@ chmod +x "/home/kiosk/scripts/fetch-display.sh"
 echo "✅ All done! At next login, Chromium will launch in kiosk mode at https://$URL"
 
 
-include /etc/sway/config.d/*
