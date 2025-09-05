@@ -39,7 +39,7 @@ sudo apt update && sudo apt install git
 ```
 3. clone repo
 ```
-git clone https://amir1330/sway-kiosk
+git clone https://github.com/amir1330/sway-kiosk
 ```
 4. install rest of the packages
 ```
