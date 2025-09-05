@@ -73,15 +73,15 @@ set \$term foot
 exec_always --no-startup-id ~/scripts/fetch-display.sh
 
 
-#output $OUTPUT {
-#        mode $RES
-#        transform $ROT
+#output \$OUTPUT {
+#        mode \$RES
+#        transform \$ROT
 #}
 
 ### Input configuration
 
-#input $TOUCH {
-#    map_to_output $OUTPUT
+#input \$TOUCH {
+#    map_to_output \$OUTPUT
 #}
 
 
