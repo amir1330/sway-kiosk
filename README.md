@@ -5,7 +5,15 @@
 - xwayland
 - sddm 
 - jq
-- git ca-certificates patch
+- git
+
+## audio pkgs
+- pipewire 
+- pipewire-pulse 
+- pipewire-audio-client-libraries 
+- libspa-0.2-bluetooth
+- libspa-0.2-jack
+- gstreamer1.0-pipewire
 
 ## minimal debian 13 install 
 1. install [debian 13 iso](https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-13.0.0-amd64-netinst.iso) and burn it to USB stick.
@@ -22,30 +30,37 @@
 12. reboot
 
 ## sway-kiosk installation
+[!IMPORTANT]
+for script to work properly make sure that user name is **kiosk**
 1. boot debian 13 and login
-2. update and upgrade
-```bash
-sudo apt update && sudo apt upgrade -y```
-3. install packages 
-```bash
-sudo apt install sddm  --no-install-recommends
-sudo apt install sway git jq chromium xwayland```
-4. clone repo
-```bash 
-git clone https://amir1330/sway-kiosk```
-5. run sddm.sh
-```bash 
-./sway-kiosk/setup/sddm.sh``` 
+2. install git
+```
+sudo apt update && sudo apt install git
+```
+3. clone repo
+```
+git clone https://amir1330/sway-kiosk
+```
+4. install rest of the packages
+```
+./sway-kiosk/setup/pkgs.sh
+```
+6. run sddm.sh
+``` 
+./sway-kiosk/setup/sddm.sh
+``` 
 7. reboot
 8. Win + Enter to open terminal 
 9. open chromium 
-```bash 
-chromium``
+``` 
+chromium
+```
 10. turn on dev mode and load extension
 ☰ -> settings -> extensions -> turn on **developer mode** -> **load unpucked** -> open /home/sway-kiosk/extensions/osk
 11. dont forget to enable extension in incognito by going -> **details** -> and **allow in incognito**
 12. in chromium setting go **language** -> and turn off **spell check** and **google translate** 
 13. in terminal press **CTRL + C** to kill chromium window and 
-```bash
-./sway-kiosk/setup/install.sh```
+```
+./sway-kiosk/setup/install.sh
+```
 14. done
