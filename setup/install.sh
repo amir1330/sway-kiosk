@@ -136,7 +136,12 @@ cat > "/home/kiosk/scripts/fetch-display.sh" <<EOF
 set -euo pipefail
 
 # Query sway for active output, max resolution, and touch device
-RES=\$(swaymsg -t get_outputs -r | jq -r '.[] | select(.active) | .modes | max_by(.width * .height) | "\(.width)x\(.height)"')
+RES=\$(swaymsg -t get_outputs -r \
+  | jq -r 'map(select(.active)) 
+           | first 
+           | .modes 
+           | max_by(.width * .height) 
+           | "\(.width)x\(.height)"')
 TOUCH=\$(swaymsg -t get_inputs -r | jq -r '.[] | select(.type=="touch") | .identifier')
 OUTPUT=\$(swaymsg -t get_outputs -r | jq -r '.[] | select(.active) | .name')
 ROTATION=$ROT
