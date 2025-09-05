@@ -35,7 +35,8 @@
 1. boot debian 13 and login
 2. install git & sddm
 ```
-sudo apt update && sudo apt install git sddm
+sudo apt update && sudo apt install git 
+sudo apt install sddm --no-install-recommends
 ```
 3. clone repo
 ```
