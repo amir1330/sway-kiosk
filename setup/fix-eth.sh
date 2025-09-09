@@ -1,37 +1,61 @@
 #!/usr/bin/env bash
 set -e
 
-echo "🔧 Quick Ethernet Fix for Debian 13"
+IFACE="enp2s0"
 
-# 1. Get first non-loopback interface
-IFACE=$(ip -o link show | awk -F': ' '{print $2}' | grep -v lo | head -n1)
+echo "🌐 Internet Fix Script Starting..."
 
-if [ -z "$IFACE" ]; then
-    echo "❌ No network interface found!"
+# 1. Bring interface up
+sudo ip link set "$IFACE" up || true
+
+# 2. Ensure DHCP config exists for systemd-networkd
+sudo mkdir -p /etc/systemd/network
+cat <<EOF | sudo tee /etc/systemd/network/20-wired.network >/dev/null
+[Match]
+Name=$IFACE
+
+[Network]
+DHCP=ipv4
+EOF
+
+# 3. Restart network services
+sudo systemctl enable systemd-networkd --now
+sudo systemctl restart systemd-networkd
+sudo systemctl enable systemd-resolved --now
+sudo systemctl restart systemd-resolved
+
+# 4. Fix resolv.conf symlink
+sudo ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
+
+# 5. Add fallback DNS if none provided
+if ! grep -q "nameserver" /etc/resolv.conf; then
+    echo "nameserver 8.8.8.8" | sudo tee -a /etc/resolv.conf
+    echo "nameserver 1.1.1.1" | sudo tee -a /etc/resolv.conf
+fi
+
+# 6. Wait a bit for DHCP
+sleep 3
+
+# 7. Show IP
+IP=$(ip -4 addr show "$IFACE" | grep -oP '(?<=inet\s)\d+(\.\d+){3}' || true)
+echo "📡 Current IP: ${IP:-none}"
+
+# 8. Test connectivity
+if ping -c 2 8.8.8.8 >/dev/null 2>&1; then
+    echo "✅ Can reach the internet (IP level)"
+else
+    echo "❌ No internet access"
     exit 1
 fi
 
-echo "✅ Using interface: $IFACE"
-
-# 2. Ensure NetworkManager is running
-sudo systemctl enable --now NetworkManager || true
-
-# 3. Delete old kiosk connections to avoid conflicts
-sudo nmcli connection delete kiosk-eth >/dev/null 2>&1 || true
-sudo nmcli connection delete static-eth >/dev/null 2>&1 || true
-
-# 4. Add fresh DHCP connection
-sudo nmcli connection add type ethernet ifname "$IFACE" con-name kiosk-eth
-sudo nmcli connection modify kiosk-eth connection.autoconnect yes
-
-# 5. Bring it up
-sudo nmcli connection up kiosk-eth || sudo dhclient -v "$IFACE"
-
-# 6. Test connectivity
-if ping -c 2 8.8.8.8 >/dev/null 2>&1; then
-    echo "🌍 Internet works (ping 8.8.8.8 successful)"
+if ping -c 2 google.com >/dev/null 2>&1; then
+    echo "✅ DNS works fine"
 else
-    echo "⚠️ No internet via DHCP. You may need static IP."
-    echo "👉 Example:"
-    echo "   sudo nmcli connection add type ethernet ifname $IFACE con-name static-eth ip4 192.168.1.50/24 gw4 192.168.1.1"
+    echo "⚠️ DNS still broken, forcing fallback..."
+    echo -e "nameserver 8.8.8.8\nnameserver 1.1.1.1" | sudo tee /etc/resolv.conf
+    sudo systemctl restart systemd-resolved
+    ping -c 2 google.com || { echo "❌ DNS failed completely"; exit 1; }
 fi
+
+echo "🎉 Internet is fully working everywhere!"
+
