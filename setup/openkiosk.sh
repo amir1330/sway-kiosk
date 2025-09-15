@@ -148,4 +148,30 @@ EOF
 
 chmod +x "$HOME/scripts/fetch-display.sh"
 
+
+### 7) Configure GRUB2 for silent boot
+echo "• Configuring GRUB bootloader..."
+
+if command -v grub-install >/dev/null 2>&1; then
+    echo "  → GRUB already installed."
+else
+    echo "  → Installing GRUB2..."
+    sudo apt update
+    sudo apt install -y grub2
+fi
+
+# Configure GRUB to hide the menu and boot straight into Debian
+sudo sed -i 's/^GRUB_TIMEOUT=.*$/GRUB_TIMEOUT=0/' /etc/default/grub
+sudo sed -i 's/^GRUB_TIMEOUT_STYLE=.*$/GRUB_TIMEOUT_STYLE=hidden/' /etc/default/grub
+
+# Optional: hide extra boot messages (makes it cleaner)
+sudo sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT=.*/GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"/' /etc/default/grub
+
+echo "  → Updating grub.cfg..."
+sudo update-grub
+
+echo "✅ GRUB is now configured to boot straight into Debian (no menu)."
+
+
+
 echo "✅ All done! At next login, OpenKiosk will launch in kiosk mode at https://$URL"
