@@ -156,6 +156,13 @@ EOF
 
 chmod +x "/home/kiosk/scripts/fetch-display.sh"
 
+### 11) Silent boot (GRUB2)
+sudo sed -i 's/^GRUB_TIMEOUT=.*$/GRUB_TIMEOUT=0/' /etc/default/grub || true
+sudo sed -i 's/^GRUB_TIMEOUT_STYLE=.*$/GRUB_TIMEOUT_STYLE=hidden/' /etc/default/grub || true
+sudo sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT=.*/GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"/' /etc/default/grub || true
+sudo update-grub
+
+
 echo "✅ All done! At next login, Chromium will launch in kiosk mode at https://$URL"
 
 
