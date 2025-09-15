@@ -1,163 +1,344 @@
 #!/usr/bin/env bash
+# install.sh -- Full OpenKiosk kiosk installer + policies + redirector + touchscreen extension
 set -euo pipefail
 
-### 1) Prompt for your kiosk domain
-read -rp "Enter the domain you want to open in kiosk mode (e.g. google.com or bromart.kz): " URL
-if [[ -z "$URL" ]]; then
-  echo "⚠️  No domain entered — exiting."
+# -------------------------
+# Helper functions
+# -------------------------
+err() { echo "✖ $*" >&2; }
+info() { echo "• $*"; }
+ok()  { echo "✔ $*"; }
+
+# -------------------------
+# 0. Ensure root
+# -------------------------
+if [[ $EUID -ne 0 ]]; then
+  err "Please run this script as root (sudo)."
   exit 1
 fi
 
-### 2) Prompt for transform value
-read -rp "Enter screen rotation (0, 90, 180, 270)(clockwise): " ROT
-case "$ROT" in
-    0|90|180|270) echo "✅ Rotation set to $ROT" ;;
-    *) echo "⚠️ Invalid rotation — must be 0, 90, 180, or 270." ; exit 1 ;;
-esac
+# -------------------------
+# 1. Ask user for URL and rotation
+# -------------------------
+read -rp "Enter kiosk URL (example: bromart.kz or https://bromart.kz): " URL_INPUT
+[[ -n "$URL_INPUT" ]] || { err "No URL entered"; exit 1; }
+if [[ "$URL_INPUT" =~ ^https?:// ]]; then
+  HOME_URL="$URL_INPUT"
+else
+  HOME_URL="https://$URL_INPUT"
+fi
 
-### 3) Create OpenKiosk profile
-PROFILE_DIR="$HOME/.openkiosk-profile"
-mkdir -p "$PROFILE_DIR/extensions"
+# derive host for whitelist
+HOST="$(python3 - <<PY
+from urllib.parse import urlparse
+u="$HOME_URL"
+print(urlparse(u).hostname or "")
+PY
+)"
+if [[ -z "$HOST" ]]; then
+  err "Could not parse hostname from $HOME_URL"
+  exit 1
+fi
 
-cat > "$PROFILE_DIR/user.js" <<EOF
-// Homepage & startup
-user_pref("browser.startup.homepage", "https://$URL");
-user_pref("startup.homepage_welcome_url", "https://$URL");
-user_pref("startup.homepage_welcome_url.additional", "https://$URL");
+read -rp "Enter screen rotation (0/90/180/270): " ROT
+case "$ROT" in 0|90|180|270) : ;; *) err "Invalid rotation"; exit 1 ;; esac
 
-// OpenKiosk lockdown
-user_pref("kiosk.enabled", true);
-user_pref("kiosk.fullscreen", true);
-user_pref("kiosk.hide_navigation_bar", true);
-user_pref("kiosk.hide_tab_bar", true);
-user_pref("kiosk.no_print", true);
-user_pref("kiosk.no_downloads", true);
-user_pref("kiosk.no_preferences", true);
+info "Kiosk homepage: $HOME_URL"
+info "Whitelist host: $HOST"
+info "Rotation: $ROT"
 
-// Force navigation back if user leaves homepage
-user_pref("kiosk.force_navigation", true);
-user_pref("kiosk.homepage", "https://$URL");
-user_pref("kiosk.allowed_domains", "https://$URL");
+# -------------------------
+# 2. Install dependencies
+# -------------------------
+info "Installing dependencies..."
+apt-get update -y
+apt-get install -y wget unzip jq zip python3 >/dev/null
 
-// Disable nags
-user_pref("browser.shell.checkDefaultBrowser", false);
-user_pref("browser.tabs.warnOnClose", false);
-user_pref("browser.tabs.warnOnOpen", false);
+# -------------------------
+# 3. Ensure OpenKiosk is installed (try apt, else ask .deb)
+# -------------------------
+if command -v OpenKiosk >/dev/null 2>&1; then
+  BINARY_PATH="$(readlink -f "$(command -v OpenKiosk)")"
+  info "Found OpenKiosk at $BINARY_PATH"
+else
+  info "OpenKiosk not found; trying to install via apt..."
+  if apt-get install -y openkiosk >/dev/null 2>&1; then
+    if command -v OpenKiosk >/dev/null 2>&1; then
+      BINARY_PATH="$(readlink -f "$(command -v OpenKiosk)")"
+      info "Installed OpenKiosk via apt: $BINARY_PATH"
+    fi
+  fi
+
+  if ! command -v OpenKiosk >/dev/null 2>&1; then
+    err "OpenKiosk package not found in apt repos on this system."
+    echo
+    read -rp "If you have a .deb installer for OpenKiosk, enter its path (or press Enter to skip): " DEB_PATH
+    if [[ -n "$DEB_PATH" && -f "$DEB_PATH" ]]; then
+      info "Installing $DEB_PATH..."
+      apt-get install -y "$DEB_PATH"
+      if command -v OpenKiosk >/dev/null 2>&1; then
+        BINARY_PATH="$(readlink -f "$(command -v OpenKiosk)")"
+        info "OpenKiosk installed: $BINARY_PATH"
+      else
+        err "OpenKiosk still not available after installing provided .deb."
+        exit 1
+      fi
+    else
+      err "No OpenKiosk binary available. Please install OpenKiosk and re-run this script."
+      exit 1
+    fi
+  fi
+fi
+
+# -------------------------
+# 4. Detect install directory
+# -------------------------
+BINARY_DIR="$(dirname "$BINARY_PATH")"
+# common candidate dirs
+CANDIDATES=( "$BINARY_DIR" "/usr/lib/OpenKiosk" "/usr/lib64/OpenKiosk" "/opt/OpenKiosk" "/usr/share/OpenKiosk" )
+INSTALL_DIR=""
+for d in "${CANDIDATES[@]}"; do
+  if [[ -d "$d" ]]; then
+    INSTALL_DIR="$d"
+    break
+  fi
+done
+# fallback to binary parent
+if [[ -z "$INSTALL_DIR" ]]; then
+  INSTALL_DIR="$BINARY_DIR"
+fi
+info "Using OpenKiosk install dir: $INSTALL_DIR"
+
+DIST_DIR="$INSTALL_DIR/distribution"
+EXT_DIR="$DIST_DIR/extensions"
+PROFILE_SYS_DIR="/etc/openkiosk-profile"
+PROFILE_KIOSK_HOME="/home/kiosk/.openkiosk-profile"
+
+sudo mkdir -p "$DIST_DIR" "$EXT_DIR" "$PROFILE_SYS_DIR" "$PROFILE_KIOSK_HOME" || true
+
+# -------------------------
+# 5. Write system-level openkiosk.cfg (best-effort prefs)
+# -------------------------
+info "Writing $INSTALL_DIR/openkiosk.cfg"
+cat > "$INSTALL_DIR/openkiosk.cfg" <<EOF
+// Generated by install.sh
+pref("browser.startup.homepage", "$HOME_URL");
+pref("startup.homepage_welcome_url", "$HOME_URL");
+pref("startup.homepage_welcome_url.additional", "$HOME_URL");
+pref("openkiosk.kioskMode", true);
+pref("kiosk.enabled", true);
+pref("kiosk.fullscreen", true);
+pref("kiosk.force_navigation", true);
+pref("kiosk.homepage", "$HOME_URL");
+pref("kiosk.allowed_domains", "$HOME_URL");
+pref("openkiosk.ui.tabbar.enabled", false);
+pref("openkiosk.ui.navigationbar.enabled", false);
+pref("browser.fullscreen.autohide", true);
+pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);
 EOF
+chmod 644 "$INSTALL_DIR/openkiosk.cfg" || true
 
-### 4) Install Touchscreen Swipe Navigation extension
-EXT_DIR="$PROFILE_DIR/extensions"
-mkdir -p "$EXT_DIR"
-
-echo "• Downloading Touchscreen Swipe Navigation..."
-wget -q -O "$EXT_DIR/touchswipec@lucasgbde@gmail.com.xpi" \
-  "https://addons.mozilla.org/firefox/downloads/latest/touchscreen-swipe-navigation/latest.xpi" || {
-    echo "⚠️ Failed to download extension."
+# -------------------------
+# 6. Build redirector extension (forces redirect to HOME_URL for non-whitelisted main-frame requests)
+# -------------------------
+info "Building redirector extension..."
+TMP_EXT="$(mktemp -d)"
+cat > "$TMP_EXT/manifest.json" <<'MM'
+{
+  "manifest_version": 2,
+  "name": "OpenKiosk Redirector",
+  "version": "1.0",
+  "description": "Redirect non-whitelisted URLs back to homepage",
+  "permissions": ["webRequest","webRequestBlocking","<all_urls>"],
+  "background": { "scripts": ["background.js"] },
+  "applications": { "gecko": { "id": "openkiosk-redirector@local" } }
 }
+MM
 
-echo "✅ OpenKiosk profile created at $PROFILE_DIR"
+cat > "$TMP_EXT/background.js" <<BG
+const HOME = "$HOME_URL";
+const ALLOWED = "$HOST";
+function isAllowed(url) {
+  try {
+    const u = new URL(url);
+    const h = u.hostname.toLowerCase();
+    return h === ALLOWED || h.endsWith("." + ALLOWED);
+  } catch(e) { return false; }
+}
+browser.webRequest.onBeforeRequest.addListener(function(details) {
+  if (details.type !== 'main_frame') return {};
+  if (details.url === HOME) return {};
+  if (isAllowed(details.url)) return {};
+  return { redirectUrl: HOME };
+}, { urls: ["<all_urls>"] }, ["blocking"]);
+BG
 
-### 5) Create systemd autostart service for OpenKiosk
-AUTOSTART_DIR="$HOME/.config/systemd/user"
-SERVICE_FILE="$AUTOSTART_DIR/openkiosk.service"
-mkdir -p "$AUTOSTART_DIR"
+( cd "$TMP_EXT" && zip -r "../openkiosk-redirector.xpi" . >/dev/null )
+mv "$TMP_EXT/../openkiosk-redirector.xpi" "$EXT_DIR/openkiosk-redirector@local.xpi"
+rm -rf "$TMP_EXT"
+chmod 644 "$EXT_DIR/openkiosk-redirector@local.xpi" || true
+ok "Redirector extension installed to $EXT_DIR/openkiosk-redirector@local.xpi"
 
-cat > "$SERVICE_FILE" <<EOF
+# -------------------------
+# 7. Download Touchscreen Swipe Navigation XPI and rename to its add-on ID
+# -------------------------
+info "Downloading Touchscreen Swipe Navigation XPI..."
+TMP_XPI="/tmp/touch_xpi_$$.xpi"
+if ! wget -q -O "$TMP_XPI" "https://addons.mozilla.org/firefox/downloads/latest/touchscreen-swipe-navigation/latest.xpi"; then
+  err "Failed to download Touchscreen Swipe Navigation from AMO. You can manually place the XPI into $EXT_DIR and re-run the rename logic."
+else
+  # try to extract add-on ID from manifest
+  MANIFEST_JSON="$(unzip -p "$TMP_XPI" manifest.json 2>/dev/null || true)"
+  ADDON_ID=""
+  if [[ -n "$MANIFEST_JSON" ]]; then
+    ADDON_ID="$(echo "$MANIFEST_JSON" | jq -r '.applications.gecko.id // .browser_specific_settings.gecko.id // .gecko_id // empty' 2>/dev/null || true)"
+    # some older xpis might use install.rdf
+    if [[ -z "$ADDON_ID" ]]; then
+      RDF="$(unzip -p "$TMP_XPI" install.rdf 2>/dev/null || true)"
+      if [[ -n "$RDF" ]]; then
+        # crude parse for id
+        ADDON_ID="$(echo "$RDF" | sed -n 's:.*<em:id>\(.*\)</em:id>.*:\1:p' | head -n1 || true)"
+      fi
+    fi
+  fi
+
+  if [[ -z "$ADDON_ID" ]]; then
+    # fallback filename
+    ADDON_ID="touchscreen-swipe-navigation@downloaded"
+    info "Could not extract addon ID; using fallback id: $ADDON_ID"
+  fi
+
+  DEST_XPI="$EXT_DIR/${ADDON_ID}.xpi"
+  mv "$TMP_XPI" "$DEST_XPI"
+  chmod 644 "$DEST_XPI" || true
+  ok "Touchscreen XPI placed at $DEST_XPI"
+fi
+
+# -------------------------
+# 8. Write distribution/policies.json to lock homepage, website filter & extensions
+# -------------------------
+info "Writing policies.json -> $DIST_DIR/policies.json"
+cat > "$DIST_DIR/policies.json" <<POL
+{
+  "policies": {
+    "Homepage": { "URL": "$HOME_URL", "Locked": true },
+    "DisablePrivateBrowsing": true,
+    "BlockAboutConfig": true,
+    "WebsiteFilter": {
+      "Block": ["*://*/*"],
+      "Exceptions": ["$HOME_URL/*"]
+    },
+    "Extensions": {
+      "Install": [
+        "file://$EXT_DIR/openkiosk-redirector@local.xpi",
+        "file://$EXT_DIR/$(basename "${DEST_XPI:-touchscreen-swipe-navigation.xpi}")"
+      ]
+    }
+  }
+}
+POL
+chmod 644 "$DIST_DIR/policies.json" || true
+ok "Policies written"
+
+# -------------------------
+# 9. Create profile fallback (userChrome.css) in /etc and later copy to kiosk user home
+# -------------------------
+info "Creating system profile fallback at $PROFILE_SYS_DIR"
+mkdir -p "$PROFILE_SYS_DIR/chrome"
+cat > "$PROFILE_SYS_DIR/user.js" <<UJS
+user_pref("browser.startup.homepage", "$HOME_URL");
+user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);
+UJS
+
+cat > "$PROFILE_SYS_DIR/chrome/userChrome.css" <<UCC
+#TabsToolbar { visibility: collapse !important; height: 0 !important; }
+#nav-bar { visibility: collapse !important; height: 0 !important; }
+#titlebar { visibility: collapse !important; height: 0 !important; }
+UCC
+chmod -R 644 "$PROFILE_SYS_DIR"/* || true
+ok "Profile fallback created at $PROFILE_SYS_DIR"
+
+# -------------------------
+# 10. Create kiosk system user (if missing) and deploy profile to /home/kiosk
+# -------------------------
+KIOSK_USER="kiosk"
+if id -u "$KIOSK_USER" >/dev/null 2>&1; then
+  info "User '$KIOSK_USER' already exists."
+else
+  info "Creating user '$KIOSK_USER'..."
+  useradd -m -s /bin/bash "$KIOSK_USER"
+  ok "User '$KIOSK_USER' created."
+fi
+
+# Copy profile to kiosk home
+KIOSK_HOME="$(getent passwd "$KIOSK_USER" | cut -d: -f6)"
+mkdir -p "$KIOSK_HOME/.openkiosk-profile" "$KIOSK_HOME/.openkiosk-profile/chrome"
+cp -r "$PROFILE_SYS_DIR/"* "$KIOSK_HOME/.openkiosk-profile/" || true
+
+# also copy installed extensions into kiosk profile (optional fallback)
+cp -n "$EXT_DIR"/*.xpi "$KIOSK_HOME/.openkiosk-profile/extensions/" 2>/dev/null || true
+
+chown -R "$KIOSK_USER":"$KIOSK_USER" "$KIOSK_HOME/.openkiosk-profile"
+ok "Profile copied to $KIOSK_HOME/.openkiosk-profile"
+
+# -------------------------
+# 11. Create systemd service to run OpenKiosk as kiosk user
+# -------------------------
+SERVICE_PATH="/etc/systemd/system/openkiosk.service"
+info "Writing systemd service to $SERVICE_PATH"
+cat > "$SERVICE_PATH" <<SVC
 [Unit]
-Description=OpenKiosk Mode
-After=graphical.target sway-session.target
-PartOf=graphical.target
+Description=OpenKiosk Kiosk Service
+After=graphical.target
 
 [Service]
+User=$KIOSK_USER
 Environment=MOZ_ENABLE_WAYLAND=1
 Environment=DISPLAY=:0
-Environment=XDG_RUNTIME_DIR=%t
-ExecStart=/usr/bin/OpenKiosk -profile $PROFILE_DIR
+Environment=HOME=$KIOSK_HOME
+ExecStart=$BINARY_PATH -profile $KIOSK_HOME/.openkiosk-profile
 Restart=always
 RestartSec=2
 
 [Install]
-WantedBy=default.target
-EOF
+WantedBy=graphical.target
+SVC
 
-systemctl --user daemon-reload
-systemctl --user enable openkiosk.service
-echo "✅ Created $SERVICE_FILE"
+systemctl daemon-reload
+systemctl enable --now openkiosk.service || true
+ok "Systemd service enabled and started (openkiosk.service)."
 
-### 6) Create sway config
-SWAY_DIR="$HOME/.config/sway"
-SWAY_CONFIG="$SWAY_DIR/config"
-RES=$(swaymsg -t get_outputs -r | jq -r '.[] | select(.active) | .modes | max_by(.width * .height) | "\(.width)x\(.height)"')
-TOUCH=$(swaymsg -t get_inputs -r | jq -r '.[] | select(.type=="touch") | .identifier')
-OUTPUT=$(swaymsg -t get_outputs -r | jq -r '.[] | select(.active) | .name')
+# -------------------------
+# 12. Configure GRUB for silent boot
+# -------------------------
+info "Configuring GRUB to hide menu (editing /etc/default/grub)..."
+sed -i 's/^GRUB_TIMEOUT=.*/GRUB_TIMEOUT=0/' /etc/default/grub || true
+sed -i 's/^GRUB_TIMEOUT_STYLE=.*/GRUB_TIMEOUT_STYLE=hidden/' /etc/default/grub || true
+sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT=.*/GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"/' /etc/default/grub || true
+update-grub || true
+ok "GRUB updated (re-run update-grub if necessary)."
 
-echo "• Setting up sway config..."
-mkdir -p "$SWAY_DIR"
-
-cat > "$SWAY_CONFIG" <<EOF
-### Variables
-set \$mod Mod4
-set \$term foot
-
-exec_always --no-startup-id ~/scripts/fetch-display.sh
-
-### Key bindings
-bindsym \$mod+Return exec \$term
-bindsym \$mod+Shift+q kill
-
-# Disable F1–F12
-bindsym --release F1 nop
-bindsym --release F2 nop
-bindsym --release F3 nop
-bindsym --release F4 nop
-bindsym --release F5 nop
-bindsym --release F6 nop
-bindsym --release F7 nop
-bindsym --release F8 nop
-bindsym --release F9 nop
-bindsym --release F10 nop
-bindsym --release F11 nop
-bindsym --release F12 nop
-
-include /etc/sway/config.d/*
-EOF
-
-echo "✅ sway config created"
-
-### 7) Display fetch script
-mkdir -p "$HOME/scripts"
-
-cat > "$HOME/scripts/fetch-display.sh" <<EOF
-#!/usr/bin/env bash
-set -euo pipefail
-
-RES=\$(swaymsg -t get_outputs -r \
-  | jq -r 'map(select(.active)) | first | .modes | max_by(.width * .height) | "\(.width)x\(.height)"')
-
-OUTPUT=\$(swaymsg -t get_outputs -r \
-  | jq -r 'map(select(.active)) | first | .name')
-
-TOUCH=\$(swaymsg -t get_inputs -r | jq -r '.[] | select(.type=="touch") | .identifier')
-
-ROTATION=$ROT
-
-echo "Applying kiosk display config:"
-echo "  OUTPUT=\$OUTPUT"
-echo "  RES=\$RES"
-echo "  TOUCH=\$TOUCH"
-
-swaymsg "output \$OUTPUT mode \$RES transform \$ROTATION"
-swaymsg "input \$TOUCH map_to_output \$OUTPUT"
-EOF
-
-chmod +x "$HOME/scripts/fetch-display.sh"
-
-### 8) Configure GRUB2 for silent boot
-echo "• Configuring GRUB bootloader..."
-sudo sed -i 's/^GRUB_TIMEOUT=.*$/GRUB_TIMEOUT=0/' /etc/default/grub || true
-sudo sed -i 's/^GRUB_TIMEOUT_STYLE=.*$/GRUB_TIMEOUT_STYLE=hidden/' /etc/default/grub || true
-sudo sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT=.*/GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"/' /etc/default/grub || true
-sudo update-grub
-
-echo "✅ GRUB is now set to boot straight into Debian (no menu)"
-echo "🎉 All done! At next login, OpenKiosk will launch in kiosk mode at https://$URL"
+# -------------------------
+# 13. Final messages & troubleshooting tips
+# -------------------------
+echo
+ok "INSTALL COMPLETE"
+echo "Summary:"
+echo "  - Homepage locked to: $HOME_URL"
+echo "  - Whitelist host: $HOST (redirector enforces other navigations back to homepage)"
+echo "  - OpenKiosk binary: $BINARY_PATH"
+echo "  - Install dir: $INSTALL_DIR"
+echo "  - Distribution policies: $DIST_DIR/policies.json"
+echo "  - Extensions: placed in $EXT_DIR"
+echo "  - System profile fallback: $PROFILE_SYS_DIR (also copied to $KIOSK_HOME/.openkiosk-profile)"
+echo "  - Systemd service: $SERVICE_PATH (runs as user '$KIOSK_USER')"
+echo
+echo "Next steps:"
+echo "  1) Reboot the machine (recommended) or run: systemctl restart openkiosk.service"
+echo "  2) In OpenKiosk open about:policies and about:addons if something didn't apply (policies errors are shown there)."
+echo "  3) If the touchscreen add-on didn't load, check $EXT_DIR for the XPI filename and verify it matches the addon's ID (manifest)."
+echo
+echo "If anything still shows (tabs/nav), or policies aren't applied, tell me the output of:"
+echo "  - $BINARY_PATH --version"
+echo "  - journalctl -u openkiosk.service --no-pager | tail -n 200"
+echo "  - ls -l $DIST_DIR $EXT_DIR"
