@@ -11,13 +11,8 @@ fi
 ### 2) Prompt for transform value
 read -rp "Enter screen rotation (0, 90, 180, 270)(clockwise): " ROT
 case "$ROT" in
-    0|90|180|270) 
-        echo "✅ Rotation set to $ROT"
-        ;;
-    *)
-        echo "⚠️ Invalid rotation — must be 0, 90, 180, or 270."
-        exit 1
-        ;;
+    0|90|180|270) echo "✅ Rotation set to $ROT" ;;
+    *) echo "⚠️ Invalid rotation — must be 0, 90, 180, or 270." ; exit 1 ;;
 esac
 
 ### 3) Create OpenKiosk profile
@@ -25,33 +20,39 @@ PROFILE_DIR="$HOME/.openkiosk-profile"
 mkdir -p "$PROFILE_DIR/extensions"
 
 cat > "$PROFILE_DIR/user.js" <<EOF
-// OpenKiosk startup page
+// Homepage & startup
 user_pref("browser.startup.homepage", "https://$URL");
 user_pref("startup.homepage_welcome_url", "https://$URL");
 user_pref("startup.homepage_welcome_url.additional", "https://$URL");
 
-// Force kiosk lockdown
+// OpenKiosk lockdown
 user_pref("kiosk.enabled", true);
 user_pref("kiosk.fullscreen", true);
+user_pref("kiosk.hide_navigation_bar", true);
+user_pref("kiosk.hide_tab_bar", true);
 user_pref("kiosk.no_print", true);
 user_pref("kiosk.no_downloads", true);
+user_pref("kiosk.no_preferences", true);
 
-// Whitelist / force redirect
-user_pref("kiosk.whitelist", "https://$URL/*");
-user_pref("kiosk.blacklist", "*");
+// Force navigation back if user leaves homepage
 user_pref("kiosk.force_navigation", true);
+user_pref("kiosk.homepage", "https://$URL");
+user_pref("kiosk.allowed_domains", "https://$URL");
 
-// Disable first-run & nags
+// Disable nags
 user_pref("browser.shell.checkDefaultBrowser", false);
 user_pref("browser.tabs.warnOnClose", false);
 user_pref("browser.tabs.warnOnOpen", false);
 EOF
 
 ### 4) Install Touchscreen Swipe Navigation extension
+EXT_DIR="$PROFILE_DIR/extensions"
+mkdir -p "$EXT_DIR"
+
 echo "• Downloading Touchscreen Swipe Navigation..."
-wget -q -O "$PROFILE_DIR/extensions/touchswipe@extension.xpi" \
+wget -q -O "$EXT_DIR/touchswipec@lucasgbde@gmail.com.xpi" \
   "https://addons.mozilla.org/firefox/downloads/latest/touchscreen-swipe-navigation/latest.xpi" || {
-    echo "⚠️ Failed to download extension — continuing without it."
+    echo "⚠️ Failed to download extension."
 }
 
 echo "✅ OpenKiosk profile created at $PROFILE_DIR"
@@ -59,7 +60,6 @@ echo "✅ OpenKiosk profile created at $PROFILE_DIR"
 ### 5) Create systemd autostart service for OpenKiosk
 AUTOSTART_DIR="$HOME/.config/systemd/user"
 SERVICE_FILE="$AUTOSTART_DIR/openkiosk.service"
-
 mkdir -p "$AUTOSTART_DIR"
 
 cat > "$SERVICE_FILE" <<EOF
@@ -72,7 +72,7 @@ PartOf=graphical.target
 Environment=MOZ_ENABLE_WAYLAND=1
 Environment=DISPLAY=:0
 Environment=XDG_RUNTIME_DIR=%t
-ExecStart=/usr/bin/openkiosk -profile $PROFILE_DIR
+ExecStart=/usr/bin/OpenKiosk -profile $PROFILE_DIR
 Restart=always
 RestartSec=2
 
@@ -160,5 +160,4 @@ sudo sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT=.*/GRUB_CMDLINE_LINUX_DEFAULT="quiet 
 sudo update-grub
 
 echo "✅ GRUB is now set to boot straight into Debian (no menu)"
-
 echo "🎉 All done! At next login, OpenKiosk will launch in kiosk mode at https://$URL"
