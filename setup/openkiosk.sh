@@ -20,39 +20,43 @@ case "$ROT" in
         ;;
 esac
 
-### 3) Create OpenKiosk config
-OPENKIOSK_DIR="$HOME/.openkiosk"
-mkdir -p "$OPENKIOSK_DIR"
+### 3) Create OpenKiosk profile
+PROFILE_DIR="$HOME/.openkiosk-profile"
+mkdir -p "$PROFILE_DIR/extensions"
 
-cat > "$OPENKIOSK_DIR/openkiosk.json" <<EOF
-{
-  "kiosk": {
-    "enabled": true,
-    "fullscreen": true,
-    "autohideNavigationBar": true,
-    "autohideTitleBar": true,
-    "autohideTabBar": true,
-    "homePage": "https://$URL",
-    "allowedDomains": [
-      "https://$URL"
-    ],
-    "whitelist": [
-      "https://$URL/*"
-    ],
-    "blacklist": ["*"],
-    "forceNavigation": true
-  },
-  "extensions": {
-    "install": [
-      "https://addons.mozilla.org/firefox/downloads/latest/touchscreen-swipe-navigation/latest.xpi"
-    ]
-  }
-}
+cat > "$PROFILE_DIR/user.js" <<EOF
+// OpenKiosk startup page
+user_pref("browser.startup.homepage", "https://$URL");
+user_pref("startup.homepage_welcome_url", "https://$URL");
+user_pref("startup.homepage_welcome_url.additional", "https://$URL");
+
+// Force kiosk lockdown
+user_pref("kiosk.enabled", true);
+user_pref("kiosk.fullscreen", true);
+user_pref("kiosk.no_print", true);
+user_pref("kiosk.no_downloads", true);
+
+// Whitelist / force redirect
+user_pref("kiosk.whitelist", "https://$URL/*");
+user_pref("kiosk.blacklist", "*");
+user_pref("kiosk.force_navigation", true);
+
+// Disable first-run & nags
+user_pref("browser.shell.checkDefaultBrowser", false);
+user_pref("browser.tabs.warnOnClose", false);
+user_pref("browser.tabs.warnOnOpen", false);
 EOF
 
-echo "✅ OpenKiosk config created at $OPENKIOSK_DIR/openkiosk.json"
+### 4) Install Touchscreen Swipe Navigation extension
+echo "• Downloading Touchscreen Swipe Navigation..."
+wget -q -O "$PROFILE_DIR/extensions/touchswipe@extension.xpi" \
+  "https://addons.mozilla.org/firefox/downloads/latest/touchscreen-swipe-navigation/latest.xpi" || {
+    echo "⚠️ Failed to download extension — continuing without it."
+}
 
-### 4) Create systemd autostart service for OpenKiosk
+echo "✅ OpenKiosk profile created at $PROFILE_DIR"
+
+### 5) Create systemd autostart service for OpenKiosk
 AUTOSTART_DIR="$HOME/.config/systemd/user"
 SERVICE_FILE="$AUTOSTART_DIR/openkiosk.service"
 
@@ -68,7 +72,7 @@ PartOf=graphical.target
 Environment=MOZ_ENABLE_WAYLAND=1
 Environment=DISPLAY=:0
 Environment=XDG_RUNTIME_DIR=%t
-ExecStart=/usr/bin/openkiosk -profile $OPENKIOSK_DIR
+ExecStart=/usr/bin/openkiosk -profile $PROFILE_DIR
 Restart=always
 RestartSec=2
 
@@ -78,9 +82,9 @@ EOF
 
 systemctl --user daemon-reload
 systemctl --user enable openkiosk.service
-echo "  → Created $SERVICE_FILE"
+echo "✅ Created $SERVICE_FILE"
 
-### 5) create sway config
+### 6) Create sway config
 SWAY_DIR="$HOME/.config/sway"
 SWAY_CONFIG="$SWAY_DIR/config"
 RES=$(swaymsg -t get_outputs -r | jq -r '.[] | select(.active) | .modes | max_by(.width * .height) | "\(.width)x\(.height)"')
@@ -120,7 +124,7 @@ EOF
 
 echo "✅ sway config created"
 
-### 6) display fetch script
+### 7) Display fetch script
 mkdir -p "$HOME/scripts"
 
 cat > "$HOME/scripts/fetch-display.sh" <<EOF
@@ -148,30 +152,13 @@ EOF
 
 chmod +x "$HOME/scripts/fetch-display.sh"
 
-
-### 7) Configure GRUB2 for silent boot
+### 8) Configure GRUB2 for silent boot
 echo "• Configuring GRUB bootloader..."
-
-if command -v grub-install >/dev/null 2>&1; then
-    echo "  → GRUB already installed."
-else
-    echo "  → Installing GRUB2..."
-    sudo apt update
-    sudo apt install -y grub2
-fi
-
-# Configure GRUB to hide the menu and boot straight into Debian
-sudo sed -i 's/^GRUB_TIMEOUT=.*$/GRUB_TIMEOUT=0/' /etc/default/grub
-sudo sed -i 's/^GRUB_TIMEOUT_STYLE=.*$/GRUB_TIMEOUT_STYLE=hidden/' /etc/default/grub
-
-# Optional: hide extra boot messages (makes it cleaner)
-sudo sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT=.*/GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"/' /etc/default/grub
-
-echo "  → Updating grub.cfg..."
+sudo sed -i 's/^GRUB_TIMEOUT=.*$/GRUB_TIMEOUT=0/' /etc/default/grub || true
+sudo sed -i 's/^GRUB_TIMEOUT_STYLE=.*$/GRUB_TIMEOUT_STYLE=hidden/' /etc/default/grub || true
+sudo sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT=.*/GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"/' /etc/default/grub || true
 sudo update-grub
 
-echo "✅ GRUB is now configured to boot straight into Debian (no menu)."
+echo "✅ GRUB is now set to boot straight into Debian (no menu)"
 
-
-
-echo "✅ All done! At next login, OpenKiosk will launch in kiosk mode at https://$URL"
+echo "🎉 All done! At next login, OpenKiosk will launch in kiosk mode at https://$URL"
