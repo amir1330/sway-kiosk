@@ -22,6 +22,10 @@ sudo apt install -y \
   git \
   jq \
   chromium \
-  xwayland
+  xwayland isc-dhcp-client iproute2 net-tools wireless-tools iw wpasupplicant rfkill curl wget network-manager
+
+
+sudo systemctl enable NetworkManager
+
 
 echo "✅ All packages installed successfully."
