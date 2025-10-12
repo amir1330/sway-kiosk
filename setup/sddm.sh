@@ -9,7 +9,7 @@ if [[ ! -f /etc/sddm.conf.d/sway.conf ]]; then
   sudo tee /etc/sddm.conf.d/sway.conf > /dev/null <<'EOF'
 [Autologin]
 User=kiosk
-Session=sway.desktop
+Session=sway
 EOF
   echo "✅ Created sway.conf."
 else
