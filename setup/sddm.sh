@@ -4,21 +4,17 @@ set -euo pipefail
 # Make sure the directory exists
 sudo mkdir -p /etc/sddm.conf.d
 
-# Create the sway.conf file if it doesn't exist
-if [[ ! -f /etc/sddm.conf.d/sway.conf ]]; then
-  sudo tee /etc/sddm.conf.d/sway.conf > /dev/null <<'EOF'
+# Create or overwrite sway.conf
+sudo tee /etc/sddm.conf.d/sway.conf > /dev/null <<EOF
 [Autologin]
-User=kiosk
+User=$USER
 Session=sway
 EOF
-  echo "✅ Created sway.conf."
-else
-  echo "⚠️  /etc/sddm.conf.d/sway.conf already exists, not overwriting."
-fi
 
-echo "🔧 Enabling and setting SDDM as default display manager..."
+echo "✅ /etc/sddm.conf.d/sway.conf has been created/updated with user '$USER'."
+
+echo "🔧 Enabling and setting SDDM as the default display manager..."
 sudo systemctl enable sddm.service
 sudo systemctl set-default graphical.target
 
-echo "✅ SDDM enabled. You can now reboot."
-
+echo "✅ SDDM enabled and configured for user '$USER'. You can now reboot."
