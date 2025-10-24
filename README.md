@@ -25,18 +25,15 @@
 7. choose a time zome -> 
 8. partition disk **Guided - use entire disk** -> **select hard disk** -> **All files in one partition** -> **finish partitioning and write changes to disk** -> **yes** -> ->
 9. configure package manager: **Kazakhstan** -> **deb.debian.org** -> HTTP proxy: **leave empty** -> surveys: **no** ->
-10. software selection: **uncheck everything** ![soft](screenshots/soft.png) ->   
+10. software selection: **uncheck everything but standard utils** ![soft](screenshots/soft.png) ->   
 11. install the GRUB bootloader: **yes** -> **choose ur hard disk** -> 
 12. reboot
 
 ## sway-kiosk installation
-> [!IMPORTANT]
-> for script to work properly make sure that user name is **kiosk**
 1. boot debian 13 and login
 2. install git & sddm
 ```
 sudo apt update && sudo apt install git 
-sudo apt install sddm --no-install-recommends
 ```
 3. clone repo
 ```
