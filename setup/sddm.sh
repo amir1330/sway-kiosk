@@ -18,3 +18,11 @@ sudo systemctl enable sddm.service
 sudo systemctl set-default graphical.target
 
 echo "✅ SDDM enabled and configured for user '$USER'. You can now reboot."
+
+### Silent boot (GRUB2)
+echo "🤫 Configuring silent boot..."
+sudo sed -i 's/^GRUB_TIMEOUT=.*$/GRUB_TIMEOUT=0/' /etc/default/grub || true
+sudo sed -i 's/^GRUB_TIMEOUT_STYLE=.*$/GRUB_TIMEOUT_STYLE=hidden/' /etc/default/grub || true
+sudo sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT=.*/GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"/' /etc/default/grub || true
+sudo update-grub
+echo "✅ GRUB updated for silent boot."
