@@ -80,6 +80,11 @@ exec_always --no-startup-id ~/scripts/fetch-display.sh
 
 ### Input configuration
 
+input type:keyboard {
+    xkb_layout "us,ru"
+    xkb_options "grp:win_space_toggle,grp:alt_shift_toggle"
+}
+
 #input \$TOUCH {
 #    map_to_output \$OUTPUT
 #}
