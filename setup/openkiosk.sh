@@ -1,17 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-### 1) Prompt for your kiosk domain
-read -rp "Enter the domain you want to open in kiosk mode (e.g. google.com or bromart.kz): " URL
-if [[ -z "$URL" ]]; then
-  echo "⚠️  No domain entered — exiting."
-  exit 1
-fi
-[[ "$URL" =~ ^https?:// ]] || URL="https://$URL"
-
-HOST=$(python3 -c "from urllib.parse import urlparse;print(urlparse('$URL').hostname or '')")
-
-### 2) Prompt for transform value
+### 1) Prompt for transform value
 read -rp "Enter screen rotation (0, 90, 180, 270)(clockwise): " ROT
 case "$ROT" in
     0|90|180|270) 
@@ -23,8 +13,8 @@ case "$ROT" in
         ;;
 esac
 
-### 3) Install OpenKiosk if missing
-PKG_URL="https://openkiosk.mozdevgroup.com/files/openkiosk-2021.1.0.en-US.linux-x86_64.deb"
+### 2) Install OpenKiosk if missing
+PKG_URL="https://www.mozdevgroup.com/dropbox/okcd/115/release/OpenKiosk115.20.0-2025-02-16-x86_64.deb"
 if ! command -v OpenKiosk >/dev/null 2>&1; then
   echo "📦 Installing OpenKiosk..."
   wget -O /tmp/openkiosk.deb "$PKG_URL"
@@ -34,36 +24,7 @@ else
   echo "✅ OpenKiosk already installed."
 fi
 
-### 4) Create OpenKiosk profile
-PROFILE_DIR="$HOME/.openkiosk-profile"
-echo "• Setting up OpenKiosk profile..."
-mkdir -p "$PROFILE_DIR/chrome"
-
-cat > "$PROFILE_DIR/user.js" <<EOF
-// Homepage & startup
-user_pref("browser.startup.homepage", "$URL");
-user_pref("startup.homepage_welcome_url", "$URL");
-user_pref("startup.homepage_welcome_url.additional", "$URL");
-
-// OpenKiosk lockdown
-user_pref("kiosk.enabled", true);
-user_pref("kiosk.fullscreen", true);
-user_pref("kiosk.hide_navigation_bar", true);
-user_pref("kiosk.hide_tab_bar", true);
-user_pref("kiosk.no_print", true);
-user_pref("kiosk.no_downloads", true);
-user_pref("kiosk.no_preferences", true);
-user_pref("kiosk.force_navigation", true);
-user_pref("kiosk.homepage", "$URL");
-
-// Disable nags
-user_pref("browser.shell.checkDefaultBrowser", false);
-user_pref("browser.tabs.warnOnClose", false);
-user_pref("browser.tabs.warnOnOpen", false);
-EOF
-
-
-### 5) Create the autostart .service
+### 3) Create the autostart .service
 AUTOSTART_DIR="$HOME/.config/systemd/user"
 SERVICE_FILE="$AUTOSTART_DIR/openkiosk.service"
 
@@ -80,7 +41,7 @@ PartOf=graphical.target
 Environment=MOZ_ENABLE_WAYLAND=1
 Environment=DISPLAY=:0
 Environment=XDG_RUNTIME_DIR=%t
-ExecStart=/usr/bin/OpenKiosk -profile $PROFILE_DIR
+ExecStart=/usr/bin/OpenKiosk
 
 Restart=always
 RestartSec=2
@@ -92,7 +53,7 @@ systemctl --user daemon-reload
 systemctl --user enable openkiosk.service
 echo "  → Created $SERVICE_FILE"
 
-### 6) Create sway config
+### 4) Create sway config
 SWAY_DIR="$HOME/.config/sway"
 SWAY_CONFIG="$HOME/.config/sway/config"
 
@@ -159,7 +120,7 @@ EOF
 
 echo "  → Sway config has been created"
 
-### 7) Display fetch script
+### 5) Display fetch script
 mkdir -p "$HOME/scripts"
 
 cat > "$HOME/scripts/fetch-display.sh" <<EOF
@@ -187,4 +148,4 @@ EOF
 
 chmod +x "$HOME/scripts/fetch-display.sh"
 
-echo "✅ All done! At next login, OpenKiosk will launch in kiosk mode at $URL"
+echo "✅ All done! At next login, OpenKiosk will launch in kiosk mode."
