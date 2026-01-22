@@ -3,40 +3,52 @@ const keyboardLayouts = {
         default: [
             ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
             ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'],
-            ['CAPS', 'z', 'x', 'c', 'v', 'b', 'n', 'm', '⌫'],
-            ['?123', '🌐', 'SPACE', '.', 'ENTER', '↓']
+            ['SHIFT', 'z', 'x', 'c', 'v', 'b', 'n', 'm', '⌫'],
+            ['123', '🌐', ',', 'SPACE', '.', 'ENTER', 'HIDE']
         ],
         shift: [
             ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
             ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
-            ['CAPS', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', '⌫'],
-            ['?123', '🌐', 'SPACE', '.', 'ENTER', '↓']
+            ['SHIFT', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', '⌫'],
+            ['123', '🌐', ',', 'SPACE', '.', 'ENTER', 'HIDE']
         ],
         symbols: [
             ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
-            ['@', '#', '$', '_', '&', '-', '+', '(', ')', '/'],
-            ['*', '"', '\'', ':', ';', '!', '?', '⌫'],
-            ['ABC', '🌐', ',', 'SPACE', '.', 'ENTER', '↓']
+            ['-', '/', ':', ';', '(', ')', '$', '&', '@', '"'],
+            ['#+=', '.', ',', '?', '!', "'", '⌫'],
+            ['ABC', '🌐', ',', 'SPACE', '.', 'ENTER', 'HIDE']
+        ],
+        symbolsAlt: [
+            ['[', ']', '{', '}', '#', '%', '^', '*', '+', '='],
+            ['_', '\\', '|', '~', '<', '>', '€', '£', '¥', '•'],
+            ['123', '.', ',', '?', '!', "'", '⌫'],
+            ['ABC', '🌐', ',', 'SPACE', '.', 'ENTER', 'HIDE']
         ]
     },
     ru: {
         default: [
             ['й', 'ц', 'у', 'к', 'е', 'н', 'г', 'ш', 'щ', 'з', 'х', 'ъ'],
             ['ф', 'ы', 'в', 'а', 'п', 'р', 'о', 'л', 'д', 'ж', 'э'],
-            ['CAPS', 'я', 'ч', 'с', 'м', 'и', 'т', 'ь', 'б', 'ю', '⌫'],
-            ['?123', '🌐', 'SPACE', '.', 'ENTER', '↓']
+            ['SHIFT', 'я', 'ч', 'с', 'м', 'и', 'т', 'ь', 'б', 'ю', '⌫'],
+            ['123', '🌐', ',', 'SPACE', '.', 'ENTER', 'HIDE']
         ],
         shift: [
             ['Й', 'Ц', 'У', 'К', 'Е', 'Н', 'Г', 'Ш', 'Щ', 'З', 'Х', 'Ъ'],
             ['Ф', 'Ы', 'В', 'А', 'П', 'Р', 'О', 'Л', 'Д', 'Ж', 'Э'],
-            ['CAPS', 'Я', 'Ч', 'С', 'М', 'И', 'Т', 'Ь', 'Б', 'Ю', '⌫'],
-            ['?123', '🌐', 'SPACE', '.', 'ENTER', '↓']
+            ['SHIFT', 'Я', 'Ч', 'С', 'М', 'И', 'Т', 'Ь', 'Б', 'Ю', '⌫'],
+            ['123', '🌐', ',', 'SPACE', '.', 'ENTER', 'HIDE']
         ],
         symbols: [
             ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
-            ['@', '#', '$', '_', '&', '-', '+', '(', ')', '/'],
-            ['*', '"', '\'', ':', ';', '!', '?', '⌫'],
-            ['ABC', '🌐', ',', 'SPACE', '.', 'ENTER', '↓']
+            ['-', '/', ':', ';', '(', ')', '$', '&', '@', '"'],
+            ['#+=', '.', ',', '?', '!', "'", '⌫'],
+            ['ABC', '🌐', ',', 'SPACE', '.', 'ENTER', 'HIDE']
+        ],
+        symbolsAlt: [
+            ['[', ']', '{', '}', '#', '%', '^', '*', '+', '='],
+            ['_', '\\', '|', '~', '<', '>', '€', '£', '¥', '•'],
+            ['123', '.', ',', '?', '!', "'", '⌫'],
+            ['ABC', '🌐', ',', 'SPACE', '.', 'ENTER', 'HIDE']
         ]
     },
     kz: {
@@ -44,37 +56,43 @@ const keyboardLayouts = {
             ['ә', 'і', 'ң', 'ғ', 'ү', 'ұ', 'қ', 'ө', 'һ'],
             ['й', 'ц', 'у', 'к', 'е', 'н', 'г', 'ш', 'щ', 'з', 'х', 'ъ'],
             ['ф', 'ы', 'в', 'а', 'п', 'р', 'о', 'л', 'д', 'ж', 'э'],
-            ['CAPS', 'я', 'ч', 'с', 'м', 'и', 'т', 'ь', 'б', 'ю', '⌫'],
-            ['?123', '🌐', 'SPACE', '.', 'ENTER', '↓']
+            ['SHIFT', 'я', 'ч', 'с', 'м', 'и', 'т', 'ь', 'б', 'ю', '⌫'],
+            ['123', '🌐', ',', 'SPACE', '.', 'ENTER', 'HIDE']
         ],
         shift: [
             ['Ә', 'І', 'Ң', 'Ғ', 'Ү', 'Ұ', 'Қ', 'Ө', 'Һ'],
             ['Й', 'Ц', 'У', 'К', 'Е', 'Н', 'Г', 'Ш', 'Щ', 'З', 'Х', 'Ъ'],
             ['Ф', 'Ы', 'В', 'А', 'П', 'Р', 'О', 'Л', 'Д', 'Ж', 'Э'],
-            ['CAPS', 'Я', 'Ч', 'С', 'М', 'И', 'Т', 'Ь', 'Б', 'Ю', '⌫'],
-            ['?123', '🌐', 'SPACE', '.', 'ENTER', '↓']
+            ['SHIFT', 'Я', 'Ч', 'С', 'М', 'И', 'Т', 'Ь', 'Б', 'Ю', '⌫'],
+            ['123', '🌐', ',', 'SPACE', '.', 'ENTER', 'HIDE']
         ],
         symbols: [
             ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
-            ['@', '#', '$', '_', '&', '-', '+', '(', ')', '/'],
-            ['*', '"', '\'', ':', ';', '!', '?', '⌫'],
-            ['ABC', '🌐', ',', 'SPACE', '.', 'ENTER', '↓']
+            ['-', '/', ':', ';', '(', ')', '$', '&', '@', '"'],
+            ['#+=', '.', ',', '?', '!', "'", '⌫'],
+            ['ABC', '🌐', ',', 'SPACE', '.', 'ENTER', 'HIDE']
+        ],
+        symbolsAlt: [
+            ['[', ']', '{', '}', '#', '%', '^', '*', '+', '='],
+            ['_', '\\', '|', '~', '<', '>', '€', '£', '¥', '•'],
+            ['123', '.', ',', '?', '!', "'", '⌫'],
+            ['ABC', '🌐', ',', 'SPACE', '.', 'ENTER', 'HIDE']
         ]
     }
 };
 
 class OnScreenKeyboard {
     constructor() {
-        this.currentLayout = 'en'; // en, ru, kz
+        this.currentLayout = 'en';
         this.isShifted = false;
         this.isSymbols = false;
+        this.isSymbolsAlt = false;
         this.isVisible = false;
         this.activeElement = null;
         this.init();
     }
 
     init() {
-        // Check if container acts existing?
         if (document.getElementById('osk-container')) return;
         this.createKeyboard();
         this.addEventListeners();
@@ -84,11 +102,6 @@ class OnScreenKeyboard {
         const container = document.createElement('div');
         container.className = 'keyboard-container';
         container.id = 'osk-container';
-        // Prevent mouse down from stealing focus and stop propagation
-        container.onmousedown = (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-        };
         document.body.appendChild(container);
         this.updateKeyboardLayout();
     }
@@ -99,52 +112,46 @@ class OnScreenKeyboard {
         container.innerHTML = '';
 
         const langLayout = keyboardLayouts[this.currentLayout];
-        let layoutRows;
+        let layout;
 
-        if (this.isSymbols) {
-            layoutRows = langLayout.symbols;
+        if (this.isSymbolsAlt) {
+            layout = langLayout.symbolsAlt;
+        } else if (this.isSymbols) {
+            layout = langLayout.symbols;
         } else {
-            layoutRows = this.isShifted ? langLayout.shift : langLayout.default;
+            layout = this.isShifted ? langLayout.shift : langLayout.default;
         }
 
-        layoutRows.forEach((row, rowIndex) => {
+        layout.forEach((row, rowIndex) => {
             const rowDiv = document.createElement('div');
             rowDiv.className = 'keyboard-row';
-            if (this.currentLayout === 'kz' && !this.isSymbols && rowIndex === 0) {
+
+            // Special styling for Kazakh first row
+            if (this.currentLayout === 'kz' && !this.isSymbols && !this.isSymbolsAlt && rowIndex === 0) {
                 rowDiv.classList.add('kz-row');
             }
 
             row.forEach(key => {
                 const keyButton = document.createElement('button');
                 keyButton.className = 'key';
+                keyButton.type = 'button';
+                keyButton.textContent = key;
 
-                let displayKey = key;
-                // Icons/Labels
-                if (key === 'SPACE') { displayKey = ' '; keyButton.classList.add('space'); }
-                else if (key === 'CAPS') { displayKey = '⇪'; keyButton.classList.add('shift'); if (this.isShifted) keyButton.classList.add('active'); }
-                else if (key === 'ENTER') { displayKey = '↵'; keyButton.classList.add('enter'); }
-                else if (key === '⌫') { displayKey = '⌫'; keyButton.classList.add('backspace'); }
-                else if (key === '🌐') { displayKey = this.currentLayout.toUpperCase(); keyButton.classList.add('lang-switch'); }
-                else if (key === '?123') { displayKey = '?123'; keyButton.classList.add('symbol-switch'); }
-                else if (key === 'ABC') { displayKey = 'ABC'; keyButton.classList.add('symbol-switch'); }
-                else if (key === '↓') { displayKey = '▼'; keyButton.classList.add('hide-keyboard'); }
-                else { keyButton.textContent = key; }
+                // Add special classes for styling
+                if (key === 'SPACE') keyButton.classList.add('space');
+                if (key === 'SHIFT') keyButton.classList.add('shift');
+                if (key === 'ENTER') keyButton.classList.add('enter');
+                if (key === '⌫') keyButton.classList.add('backspace');
+                if (key === '🌐') keyButton.classList.add('lang-switch');
+                if (key === '123' || key === 'ABC' || key === '#+=') keyButton.classList.add('symbol-switch');
+                if (key === 'HIDE') keyButton.classList.add('hide-keyboard');
 
-                if (displayKey !== key && !keyButton.textContent) keyButton.textContent = displayKey;
-
-                // Handle interaction on mousedown/touchstart to prevent focus loss
-                // content scripts run with a separate DOM wrapper, but events are shared.
-                const handleInteraction = (e) => {
+                // Event handlers
+                keyButton.addEventListener('click', (e) => {
                     e.preventDefault();
-                    e.stopImmediatePropagation(); // Aggressively stop other listeners
+                    e.stopPropagation();
                     this.handleKeyPress(key);
-                };
-
-                keyButton.addEventListener('mousedown', handleInteraction);
-                keyButton.addEventListener('touchstart', handleInteraction, { passive: false });
-
-                // Remove old onclick
-                keyButton.onclick = null;
+                });
 
                 rowDiv.appendChild(keyButton);
             });
@@ -156,106 +163,110 @@ class OnScreenKeyboard {
     handleKeyPress(key) {
         if (!this.activeElement) return;
 
-        // Ensure focus is still on the element (sometimes needed)
-        // this.activeElement.focus(); 
+        const element = this.activeElement;
 
         switch (key) {
-            case 'CAPS':
+            case 'SHIFT':
                 this.isShifted = !this.isShifted;
                 this.updateKeyboardLayout();
                 break;
+
             case 'ENTER':
-                if (this.activeElement.tagName === 'TEXTAREA') {
-                    this.insertText('\n');
+                if (element.tagName === 'TEXTAREA') {
+                    this.insertTextAtCursor('\n');
                 } else {
-                    // Try to submit form or just trigger Enter event
-                    this.activeElement.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
-                    this.activeElement.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', bubbles: true }));
-                    // Often helpful to hide keyboard on Enter in inputs
-                    // this.hideKeyboard();
+                    element.form?.submit();
+                    this.hideKeyboard();
                 }
                 break;
+
             case '⌫':
-                // Handle backspace properly (remove char at cursor)
-                this.simulateBackspace();
+                this.handleBackspace();
                 break;
+
             case 'SPACE':
-                this.insertText(' ');
+                this.insertTextAtCursor(' ');
                 break;
+
             case '🌐':
                 this.cycleLanguage();
                 break;
-            case '?123':
+
+            case '123':
                 this.isSymbols = true;
+                this.isSymbolsAlt = false;
                 this.updateKeyboardLayout();
                 break;
-            case 'ABC':
+
+            case '#+=':
+                this.isSymbolsAlt = true;
                 this.isSymbols = false;
                 this.updateKeyboardLayout();
                 break;
-            case '↓':
+
+            case 'ABC':
+                this.isSymbols = false;
+                this.isSymbolsAlt = false;
+                this.updateKeyboardLayout();
+                break;
+
+            case 'HIDE':
                 this.hideKeyboard();
                 break;
+
             default:
-                this.insertText(key);
-            // If we want auto-uncap after one letter:
-            // if (this.isShifted) { this.isShifted = false; this.updateKeyboardLayout(); }
-            // But user asked for CAPSLOCK, so we keep it until toggled off.
+                this.insertTextAtCursor(key);
+                // Auto-disable shift after typing one character
+                if (this.isShifted && !this.isSymbols && !this.isSymbolsAlt) {
+                    this.isShifted = false;
+                    this.updateKeyboardLayout();
+                }
         }
+    }
+
+    insertTextAtCursor(text) {
+        const element = this.activeElement;
+        const start = element.selectionStart || 0;
+        const end = element.selectionEnd || 0;
+        const value = element.value || '';
+
+        // Insert text at cursor position
+        element.value = value.substring(0, start) + text + value.substring(end);
+
+        // Move cursor after inserted text
+        const newPos = start + text.length;
+        element.selectionStart = element.selectionEnd = newPos;
+
+        // Trigger input event for reactivity
+        element.dispatchEvent(new Event('input', { bubbles: true }));
+        element.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    handleBackspace() {
+        const element = this.activeElement;
+        const start = element.selectionStart || 0;
+        const end = element.selectionEnd || 0;
+        const value = element.value || '';
+
+        if (start !== end) {
+            // Delete selection
+            element.value = value.substring(0, start) + value.substring(end);
+            element.selectionStart = element.selectionEnd = start;
+        } else if (start > 0) {
+            // Delete one character before cursor
+            element.value = value.substring(0, start - 1) + value.substring(start);
+            element.selectionStart = element.selectionEnd = start - 1;
+        }
+
+        element.dispatchEvent(new Event('input', { bubbles: true }));
+        element.dispatchEvent(new Event('change', { bubbles: true }));
     }
 
     cycleLanguage() {
         const langs = ['en', 'ru', 'kz'];
-        const idx = langs.indexOf(this.currentLayout);
-        this.currentLayout = langs[(idx + 1) % langs.length];
-        // Reset states
-        // this.isShifted = false; // Maybe keep shift state?
-        // this.isSymbols = false;
+        const currentIndex = langs.indexOf(this.currentLayout);
+        this.currentLayout = langs[(currentIndex + 1) % langs.length];
         this.updateKeyboardLayout();
-    }
-
-    insertText(text) {
-        const el = this.activeElement;
-        const start = el.selectionStart;
-        const end = el.selectionEnd;
-
-        // Insert text at cursor
-        const val = el.value;
-        const before = val.substring(0, start);
-        const after = val.substring(end);
-
-        el.value = before + text + after;
-
-        // Move cursor
-        el.selectionStart = el.selectionEnd = start + text.length;
-
-        // Trigger events
-        el.dispatchEvent(new Event('input', { bubbles: true }));
-        el.dispatchEvent(new Event('change', { bubbles: true }));
-    }
-
-    simulateBackspace() {
-        const el = this.activeElement;
-        const start = el.selectionStart;
-        const end = el.selectionEnd;
-        const val = el.value;
-
-        if (start === end) {
-            if (start > 0) {
-                const before = val.substring(0, start - 1);
-                const after = val.substring(end);
-                el.value = before + after;
-                el.selectionStart = el.selectionEnd = start - 1;
-            }
-        } else {
-            // Delete selection
-            const before = val.substring(0, start);
-            const after = val.substring(end);
-            el.value = before + after;
-            el.selectionStart = el.selectionEnd = start;
-        }
-
-        el.dispatchEvent(new Event('input', { bubbles: true }));
     }
 
     showKeyboard(element) {
@@ -273,38 +284,41 @@ class OnScreenKeyboard {
             container.classList.remove('visible');
             this.isVisible = false;
         }
-        // Don't nullify activeElement immediately if we want to support external focus changes?
-        // But for safety:
         this.activeElement = null;
     }
 
     addEventListeners() {
+        // Show keyboard on input focus
         document.addEventListener('focusin', (e) => {
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
-                const type = e.target.type;
-                // Ignore specific input types? (checkbox, radio, etc)
-                if (['checkbox', 'radio', 'button', 'submit', 'range', 'color', 'file', 'hidden', 'image'].includes(type)) return;
-
-                this.showKeyboard(e.target);
+                const type = e.target.type || 'text';
+                // Exclude non-text input types
+                const excludedTypes = ['checkbox', 'radio', 'button', 'submit', 'reset',
+                    'file', 'image', 'color', 'range', 'hidden'];
+                if (!excludedTypes.includes(type)) {
+                    this.showKeyboard(e.target);
+                }
             }
         });
 
+        // Hide keyboard on click outside
         document.addEventListener('click', (e) => {
             const container = document.getElementById('osk-container');
             if (!container) return;
 
-            // If click is outside keyboard AND outside the input
-            if (this.isVisible &&
-                !container.contains(e.target) &&
-                e.target !== this.activeElement) {
+            const isKeyboard = container.contains(e.target);
+            const isInput = e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA';
+            const isSelect = e.target.closest('select');
+
+            if (!isKeyboard && !isInput && !isSelect && this.isVisible) {
                 this.hideKeyboard();
             }
         });
     }
 }
 
-// Initialize
-if (!window.hasOSKInitialized) {
-    window.hasOSKInitialized = true;
+// Initialize keyboard
+if (!window.oskInitialized) {
+    window.oskInitialized = true;
     new OnScreenKeyboard();
 }
