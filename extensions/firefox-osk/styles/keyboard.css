@@ -1,0 +1,109 @@
+.keyboard-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  background: #1c1c1c;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
+  padding: 6px 4px;
+  z-index: 2147483647; /* Max z-index */
+  display: none;
+  font-family: 'Roboto', system-ui, sans-serif;
+  box-sizing: border-box;
+  border-top: 1px solid #333;
+  user-select: none;
+}
+
+.keyboard-container.visible {
+  display: block;
+}
+
+.keyboard-row {
+  display: flex;
+  justify-content: center;
+  margin: 4px 0;
+  width: 100%;
+  max-width: 100%;
+  gap: 4px;
+  padding: 0 4px;
+}
+
+.key {
+  height: 54px;
+  border: none;
+  border-radius: 4px; /* Android style is often slightly rounded or rect */
+  background: #424242;
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  font-weight: 400;
+  transition: background 0.1s;
+  min-width: 0; /* Allow shrinking */
+}
+
+.key:hover {
+  background: #505050;
+}
+
+.key:active {
+  background: #616161;
+}
+
+.key.special {
+    background: #303030;
+}
+
+.key.space {
+  flex: 5;
+}
+
+.key.shift {
+  flex: 1.5;
+  background: #303030;
+}
+.key.shift.active {
+    background: #d4e1f5;
+    color: #000;
+}
+
+.key.enter {
+  flex: 1.5;
+  background: #00897b; /* Teal 600 */
+  color: white;
+}
+
+.key.backspace {
+  flex: 1.5;
+  background: #303030;
+}
+
+.key.lang-switch,
+.key.symbol-switch,
+.key.hide-keyboard {
+  flex: 1.2;
+  background: #303030;
+  font-size: 16px;
+}
+
+/* Specific Kazakh letters row adjustments if needed */
+.kz-row .key {
+    font-size: 18px; /* Slightly smaller if crowded */
+}
+
+/* Tablet/Desktop optimizations */
+@media screen and (min-width: 1024px) {
+    .keyboard-row {
+        gap: 6px;
+    }
+    .key {
+        height: 60px;
+        border-radius: 6px;
+        font-size: 22px;
+    }
+}

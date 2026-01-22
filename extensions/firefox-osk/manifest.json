@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "Firefox OSK (KZ/RU/EN)",
+  "version": "1.0",
+  "description": "A minimal, Android-like on-screen keyboard for Firefox Kiosk with KZ, RU, and EN support.",
+  "permissions": [
+    "activeTab",
+    "storage"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["src/content.js"],
+      "css": ["styles/keyboard.css"]
+    }
+  ],
+  "background": {
+    "scripts": ["src/background.js"]
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "osk@kiosk.local",
+      "strict_min_version": "42.0"
+    }
+  }
+}
