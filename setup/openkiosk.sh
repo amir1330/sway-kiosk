@@ -33,21 +33,19 @@ mkdir -p "$AUTOSTART_DIR"
 
 cat > "$SERVICE_FILE" <<EOF
 [Unit]
-Description=OpenKiosk Mode
-After=graphical.target sway-session.target
-PartOf=graphical.target
+Description=OpenKiosk (Wayland / Firefox backend)
+After=graphical-session.target
+Wants=graphical-session.target
 
 [Service]
+Type=simple
 Environment=MOZ_ENABLE_WAYLAND=1
-Environment=DISPLAY=:0
-Environment=XDG_RUNTIME_DIR=%t
 ExecStart=/usr/bin/OpenKiosk
-
 Restart=always
 RestartSec=2
 
 [Install]
-WantedBy=default.target
+WantedBy=graphical-session.target
 EOF
 systemctl --user daemon-reload
 systemctl --user enable openkiosk.service
